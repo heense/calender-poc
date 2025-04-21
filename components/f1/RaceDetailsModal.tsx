@@ -7,16 +7,9 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Flag } from "lucide-react";
+import { Database } from "@/types/database.types";
 
-type F1Race = {
-  id: number;
-  race_name: string;
-  race_date: string;
-  track_name: string;
-  track_country: string;
-  track_city: string;
-  sprint_race: boolean;
-};
+type F1Race = Database["public"]["Tables"]["f1_races_2025"]["Row"];
 
 interface RaceDetailsModalProps {
   race: F1Race | null;

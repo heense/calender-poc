@@ -21,16 +21,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RaceDetailsModal } from "./RaceDetailsModal";
+import { Database } from "@/types/database.types";
 
-type F1Race = {
-  id: number;
-  race_name: string;
-  race_date: string;
-  track_name: string;
-  track_country: string;
-  track_city: string;
-  sprint_race: boolean;
-};
+type F1Race = Database["public"]["Tables"]["f1_races_2025"]["Row"];
 
 interface F1CalendarProps {
   races: F1Race[];
@@ -123,6 +116,11 @@ export function F1Calendar({ races }: F1CalendarProps) {
                     >
                       <div className="font-medium">{race.race_name}</div>
                       <div className="text-gray-500">{race.track_name}</div>
+                      {race.sprint_race && (
+                        <Badge variant="secondary" className="mt-1">
+                          Sprint
+                        </Badge>
+                      )}
                     </button>
                   ))}
                 </div>

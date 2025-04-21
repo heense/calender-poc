@@ -1,7 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { CalendarView } from "./types";
+import type { CalendarView } from "./types";
 
 interface CalendarHeaderProps {
   currentDate: Date;

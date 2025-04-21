@@ -23,6 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/calendar/Calendar";
 import Loading from "./loading";
+import { Database } from "@/types/database.types";
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -31,9 +32,10 @@ const supabase = createClient(
 );
 
 type RaceFormat = "all" | "sprint" | "standard";
+type F1Race = Database["public"]["Tables"]["f1_races_2025"]["Row"];
 
 export default function F1CalendarPage() {
-  const [races, setRaces] = useState<any[]>([]);
+  const [races, setRaces] = useState<F1Race[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -78,15 +80,15 @@ export default function F1CalendarPage() {
 
     const matchesFormat =
       raceFormat === "all" ||
-      (raceFormat === "sprint" && race.sprint_race) ||
-      (raceFormat === "standard" && !race.sprint_race);
+      (raceFormat === "sprint" && race.sprint_race === true) ||
+      (raceFormat === "standard" && race.sprint_race !== true);
 
     return matchesSearch && matchesFormat;
   });
 
   const stats = {
     totalRaces: races.length,
-    sprintRaces: races.filter((r) => r.sprint_race).length,
+    sprintRaces: races.filter((r) => r.sprint_race === true).length,
     countries: new Set(races.map((r) => r.track_country)).size,
   };
 
@@ -187,7 +189,7 @@ export default function F1CalendarPage() {
                 <TableCell>{race.track_name}</TableCell>
                 <TableCell>{`${race.track_city}, ${race.track_country}`}</TableCell>
                 <TableCell>
-                  {race.sprint_race ? (
+                  {race.sprint_race === true ? (
                     <Badge variant="secondary">Sprint</Badge>
                   ) : (
                     <Badge variant="outline">Standard</Badge>
