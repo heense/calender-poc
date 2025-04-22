@@ -11,17 +11,24 @@ import {
   endOfWeek,
 } from "date-fns";
 import type { CalendarEvent } from "./types";
+import { cn } from "@/lib/utils";
 
 interface MonthViewProps {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (event: CalendarEvent) => void;
+  getSeriesStyles: (event: CalendarEvent) => {
+    bg: string;
+    border: string;
+    dot: string;
+  };
 }
 
 export function MonthView({
   currentDate,
   events,
   onEventClick,
+  getSeriesStyles,
 }: MonthViewProps) {
   const findEventsForDay = (day: Date) => {
     return events.filter((event) => isSameDay(parseISO(event.race_date), day));
@@ -67,16 +74,29 @@ export function MonthView({
                 {format(day, "d")}
               </div>
               <div className="mt-1 space-y-1">
-                {dayEvents.map((event) => (
-                  <button
-                    key={event.id}
-                    onClick={() => onEventClick(event)}
-                    className="w-full text-left text-xs p-1 rounded bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors"
-                  >
-                    <div className="font-medium">{event.race_name}</div>
-                    <div className="text-gray-500">{event.track_name}</div>
-                  </button>
-                ))}
+                {dayEvents.map((event) => {
+                  const styles = getSeriesStyles(event);
+                  return (
+                    <button
+                      key={event.id}
+                      onClick={() => onEventClick(event)}
+                      className={cn(
+                        "w-full text-left text-xs p-1 rounded border transition-colors",
+                        styles.bg,
+                        styles.border,
+                        "hover:brightness-95"
+                      )}
+                    >
+                      <div className="font-medium">{event.race_name}</div>
+                      <div className="text-gray-500">{event.track_name}</div>
+                      {event.sprint_race && (
+                        <div className="text-xs mt-0.5 opacity-75">
+                          Sprint Race
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           );

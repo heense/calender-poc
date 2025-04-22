@@ -14,14 +14,25 @@ import {
   eachMonthOfInterval,
 } from "date-fns";
 import type { CalendarEvent } from "./types";
+import { cn } from "@/lib/utils";
 
 interface YearViewProps {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (event: CalendarEvent) => void;
+  getSeriesStyles: (event: CalendarEvent) => {
+    bg: string;
+    border: string;
+    dot: string;
+  };
 }
 
-export function YearView({ currentDate, events, onEventClick }: YearViewProps) {
+export function YearView({
+  currentDate,
+  events,
+  onEventClick,
+  getSeriesStyles,
+}: YearViewProps) {
   const yearStart = startOfYear(currentDate);
   const yearEnd = endOfYear(currentDate);
   const monthsInYear = eachMonthOfInterval({
@@ -74,12 +85,18 @@ export function YearView({ currentDate, events, onEventClick }: YearViewProps) {
                     {format(day, "d")}
                     {dayEvents.length > 0 && (
                       <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 flex gap-[2px]">
-                        {dayEvents.map((event) => (
-                          <div
-                            key={event.id}
-                            className="w-1.5 h-1.5 rounded-full bg-blue-500"
-                          />
-                        ))}
+                        {dayEvents.map((event) => {
+                          const styles = getSeriesStyles(event);
+                          return (
+                            <div
+                              key={event.id}
+                              className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                styles.dot
+                              )}
+                            />
+                          );
+                        })}
                       </div>
                     )}
                   </button>

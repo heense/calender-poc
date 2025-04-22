@@ -12,33 +12,63 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-type F1Race = Database["public"]["Tables"]["f1_races_2025"]["Row"];
+type Race = Database["public"]["Tables"]["races"]["Row"] & {
+  race_series?: Database["public"]["Tables"]["race_series"]["Row"];
+  driver_entries?: Array<{
+    driver?: {
+      first_name: string;
+      last_name: string;
+      nationality: string;
+    };
+    team?: {
+      name: string;
+    };
+  }>;
+};
+type RaceSeries = Database["public"]["Tables"]["race_series"]["Row"];
 
-export default function F1CalendarPage() {
-  const [races, setRaces] = useState<F1Race[]>([]);
+export default function RacingCalendarPage() {
+  const [races, setRaces] = useState<Race[]>([]);
+  const [series, setSeries] = useState<RaceSeries[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRaces = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
-        .from("f1_races_2025")
+      // Fetch all series
+      const { data: seriesData, error: seriesError } = await supabase
+        .from("race_series")
         .select("*")
-        .order("race_date", { ascending: true });
+        .order("name");
 
-      if (error) {
-        setError(error.message);
-        setRaces([]);
-      } else {
-        setRaces(data || []);
-      }
+      if (seriesError) throw seriesError;
+      setSeries(seriesData);
+
+      // Fetch all races with series information
+      const { data: racesData, error: racesError } = await supabase
+        .from("races")
+        .select(
+          `
+          *,
+          race_series (
+            id,
+            name,
+            code
+          )
+        `
+        )
+        .order("race_date");
+
+      if (racesError) throw racesError;
+      setRaces(racesData);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred"
       );
+      setSeries([]);
       setRaces([]);
     } finally {
       setLoading(false);
@@ -46,7 +76,7 @@ export default function F1CalendarPage() {
   };
 
   useEffect(() => {
-    fetchRaces();
+    fetchData();
   }, []);
 
   if (loading) return <Loading />;
@@ -58,7 +88,7 @@ export default function F1CalendarPage() {
           <h3 className="text-lg font-semibold mb-2">Error Loading Data</h3>
           <p>{error}</p>
           <button
-            onClick={fetchRaces}
+            onClick={fetchData}
             className="mt-4 px-4 py-2 bg-red-100 hover:bg-red-200 rounded-md transition-colors"
           >
             Try Again
@@ -70,10 +100,11 @@ export default function F1CalendarPage() {
 
   return (
     <div className="container mx-auto py-10 space-y-8">
-      <h1 className="text-4xl font-bold">F1 Calendar 2025</h1>
+      <h1 className="text-4xl font-bold">Racing Calendar 2025</h1>
       <div className="mb-8">
         <Calendar events={races} />
       </div>
     </div>
   );
 }
+

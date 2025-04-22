@@ -1,5 +1,9 @@
-import type { Database } from "../../types/database.types";
+import { Database } from "@/types/database.types";
 
-export type CalendarEvent =
-  Database["public"]["Tables"]["f1_races_2025"]["Row"];
+export type Race = Database["public"]["Tables"]["races"]["Row"] & {
+  race_series?: Database["public"]["Tables"]["race_series"]["Row"];
+};
+
+export type CalendarEvent = Race;
+
 export type CalendarView = "month" | "year";
